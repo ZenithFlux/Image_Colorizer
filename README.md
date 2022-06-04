@@ -1,2 +1,7 @@
 # Image_Colorizer
-This program colors B&amp;W images using deep learning
+
+This program colors B&W images using deep learning.
+
+Type this in command line to install all dependencies:
+
+```pip install -r requirements.txt```
