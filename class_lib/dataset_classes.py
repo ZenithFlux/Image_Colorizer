@@ -37,20 +37,34 @@ class Datapaths:
 class ImagesDataset(Dataset):
     def __init__(self, paths, dataset_type: str = 'train', image_size: tuple = (256, 256)):
         self.paths = paths
-        self.type = dataset_type
-        self.size = image_size
+        
+        BICUBIC = transforms.InterpolationMode.BICUBIC
+        
+        if dataset_type == 'train':
+            self.transformations = transforms.Compose([transforms.Resize(image_size, BICUBIC),
+                                                       transforms.RandomHorizontalFlip()])
+        else:
+            self.transformations = transforms.Resize(image_size, BICUBIC)
         
     def __getitem__(self, i):
         img = Image.open(self.paths[i]).convert('RGB')
-        img = transforms.Resize(self.size, Image.BICUBIC)(img)
-        if self.type == 'train':
-            img = transforms.RandomHorizontalFlip()(img)
+        img = self.transformations(img)
             
         img = rgb2lab(img).astype("float32")
         img = transforms.ToTensor()(img)
-        L = img[[0], ...] / 50.-1
+        L = img[[0], ...]/50.0 - 1
         ab = img[[1, 2], ...] / 110
         return {'L': L, 'ab': ab}
     
     def __len__(self):
         return len(self.paths)
+    
+
+'''
+Function to create dataloaders:
+- pin_memory is set to True by default bcz my pc has CUDA available
+'''
+def make_dataloader(paths, batch_size: int = 16, num_workers: int = 2, pin_memory: bool = True, **kwargs):
+    dataset = ImagesDataset(paths, **kwargs)
+    dataloader = DataLoader(dataset, batch_size= batch_size, num_workers= num_workers, pin_memory= pin_memory)
+    return dataloader
