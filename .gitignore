@@ -1,3 +1,5 @@
 venv
 dataset
 class_lib/__pycache__
+nnetworks/__pycache__
+test.py

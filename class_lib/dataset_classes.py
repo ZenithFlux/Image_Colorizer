@@ -52,8 +52,8 @@ class ImagesDataset(Dataset):
             
         img = rgb2lab(img).astype("float32")
         img = transforms.ToTensor()(img)
-        L = img[[0], ...]/50.0 - 1
-        ab = img[[1, 2], ...] / 110
+        L = img[[0], ...]/50.0 - 1      # Bring between -1 ans 1
+        ab = img[[1, 2], ...] / 128     # Bring between -1 and 1
         return {'L': L, 'ab': ab}
     
     def __len__(self):
