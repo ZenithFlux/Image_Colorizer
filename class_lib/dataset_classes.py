@@ -46,7 +46,7 @@ class ImagesDataset(Dataset):
         else:
             self.transformations = transforms.Resize(image_size, BICUBIC)
         
-    def __getitem__(self, i):
+    def __getitem__(self, i: int) -> dict:
         img = Image.open(self.paths[i]).convert('RGB')
         img = self.transformations(img)
             
@@ -64,7 +64,7 @@ class ImagesDataset(Dataset):
 Function to create dataloaders:
 - pin_memory is set to True by default bcz my pc has CUDA available
 '''
-def make_dataloader(paths, batch_size: int = 16, num_workers: int = 2, pin_memory: bool = True, **kwargs):
-    dataset = ImagesDataset(paths, **kwargs)
+def make_dataloader(paths, dataset_type: str, batch_size: int = 16, num_workers: int = 2, pin_memory: bool = True, **kwargs) -> DataLoader:
+    dataset = ImagesDataset(paths, dataset_type=dataset_type, **kwargs)
     dataloader = DataLoader(dataset, batch_size= batch_size, num_workers= num_workers, pin_memory= pin_memory)
     return dataloader
