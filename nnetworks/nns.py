@@ -4,8 +4,15 @@ from fastai.vision.learner import create_body
 from torchvision.models.resnet import resnet18
 from fastai.vision.models.unet import DynamicUnet
 from tqdm import tqdm
+from class_lib.utility import AverageCalculator
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# function to create generator
+def unet_resnet18(in_channels: int, out_channels: int, size: tuple[int, int] = (256, 256)) -> DynamicUnet:
+    body = create_body(resnet18(True), pretrained=True, n_in=in_channels, cut=-2)
+    model = DynamicUnet(body, out_channels, size).to(DEVICE)
+    return model  
 
 class GANLoss(nn.Module):
     def __init__(self, real_label: float=1.0, fake_label: float=0.0):
@@ -42,9 +49,9 @@ class PatchDiscriminator(nn.Module):
     
     def forward(self, X):
         return self.model(X)
-    
-class MainModel(nn.module):
-    def __init__(self, net_g, lr_g: float=2e-4, lr_d: float=2e-4, beta1: float=0.5, beta2: float=0.999, lambda_L1: int=100):
+  
+class MainModel(nn.Module):
+    def __init__(self, net_g = unet_resnet18(1, 2), lr_g: float=2e-4, lr_d: float=2e-4, beta1: float=0.5, beta2: float=0.999, lambda_L1: int=100):
         super().__init__()
         self.lambda_L1 = lambda_L1
         self.net_g = net_g.to(DEVICE)
@@ -73,29 +80,29 @@ class MainModel(nn.module):
         
     def backward_g(self):
         fake_image = torch.cat([self.L, self.fake_ab], dim=1)
-        with torch.no_grad(): fake_preds = self.net_d(fake_image)
+        fake_preds = self.net_d(fake_image)
         self.gan_loss_g = self.GANcriterion(fake_preds, True)
         self.L1_loss_g = self.L1criterion(self.fake_ab, self.ab) * self.lambda_L1
         self.loss_g = self.gan_loss_g + self.L1_loss_g
         self.loss_g.backward()
         
+    def set_requires_grad(self, model, requires_grad=True):
+        for p in model.parameters():
+            p.requires_grad = requires_grad
+        
     def optimize(self):
         self.forward()
         self.net_d.train()
+        self.set_requires_grad(self.net_d, True)
         self.opt_d.zero_grad()
         self.backward_d()
         self.opt_d.step()
         
         self.net_g.train()
+        self.set_requires_grad(self.net_d, False)
         self.opt_g.zero_grad()
         self.backward_g()
         self.opt_g.step()
-
-# function to create generator
-def unet_resnet18(in_channels: int, out_channels: int, size: tuple[int, int] = (256, 256)) -> DynamicUnet:
-    body = create_body(resnet18, pretrained=True, n_in=in_channels, cut=-2)
-    model = DynamicUnet(body, out_channels, size).to(DEVICE)
-    return model
 
 # This function initialises weights of a model
 def init_model(model, gain: float = 0.02):
@@ -111,11 +118,13 @@ def init_model(model, gain: float = 0.02):
                 nn.init.constant_(layer.bias, 0.)
                 
     model.apply(init_weights)
-    print("Model initialized!")
     return model
 
 def pretrain(model, train_dl, optimizer, loss_func, epochs: int):
     for e in range(epochs):
+        print(f'\nPretraining Epoch {e+1}/{epochs}:')
+        avg_calc = AverageCalculator()
+        
         for data in tqdm(train_dl):
             L, ab = data['L'].to(DEVICE), data['ab'].to(DEVICE)
             preds = model(L)
@@ -124,18 +133,28 @@ def pretrain(model, train_dl, optimizer, loss_func, epochs: int):
             optimizer.step()
             optimizer.zero_grad()
             
-        print(f'Epoch {e+1}: Loss = {loss.item()}')
+            avg_calc.update(loss.item())
+        
+        avg_loss = avg_calc.average()    
+        print(f'Epoch {e+1}: Avg. Loss = {avg_loss}')
     
-    print("Generator Pretrained!")
+    print("\nGenerator Pretrained!")
     
-def train_model(model, train_dl, epochs: int, display_every: int=200):
+def train_model(model, train_dl, epochs: int, save_path: str):
     for epoch in range(epochs):
-        i=0
+        print(f'\nTraining Epoch {epoch+1}/{epochs}:')
+        avg_calc = AverageCalculator()
+        
         for data in tqdm(train_dl):
             model.setup_input(data)
             model.optimize()
             
-            i += 1
-            if i % display_every == 0:
-                print(f'\nEpoch {epoch+1}, Iteration {i+1}:')
-                print(f"    Generator's loss = {model.loss_g.item()}")
+            avg_calc.update(model.loss_g.item())
+        
+        avg_loss = avg_calc.average()
+        print(f'Epoch {epoch+1}: Avg. Loss = {avg_loss}')
+        
+        torch.save(model.state_dict(), save_path)
+        print("Model saved")
+    
+    print("\nTraining Complete!")
