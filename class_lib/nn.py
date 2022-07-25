@@ -4,7 +4,7 @@ from fastai.vision.learner import create_body
 from torchvision.models.resnet import resnet18
 from fastai.vision.models.unet import DynamicUnet
 from tqdm import tqdm
-from class_lib.utility import AverageCalculator
+from .utility import AverageCalculator
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -65,7 +65,12 @@ class MainModel(nn.Module):
         self.L = data['L'].to(DEVICE)
         self.ab = data['ab'].to(DEVICE)
         
-    def forward(self):
+    def forward(self, L = None):
+        if L is not None:
+            L = L.to(DEVICE)
+            with torch.no_grad(): ab = self.net_g(L)
+            return ab
+            
         self.fake_ab = self.net_g(self.L)
         
     def backward_d(self):

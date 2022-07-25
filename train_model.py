@@ -1,17 +1,15 @@
 import os
 import torch
-from nnetworks import MainModel, unet_resnet18, train_model, pretrain, DEVICE
+from class_lib.nn import MainModel, unet_resnet18, train_model, pretrain, DEVICE
 from class_lib.data import Datapaths, make_dataloader
 from settings import *
-
-main_model_path = "main_model.pt"
 
 def main():
 
     paths = Datapaths(DATASET_PATH, TRAINING_SET_SIZE, 0)
     train_dl = make_dataloader(paths.train_paths, 'train', IMAGE_SIZE, BATCH_SIZE, NUM_WORKERS)
 
-    if not os.path.exists(main_model_path):
+    if not os.path.exists(MODEL_PATH):
         net_g = unet_resnet18(1, 2)
         opt = torch.optim.Adam(net_g.parameters(), 1e-4)
         loss_func = torch.nn.L1Loss()
@@ -19,17 +17,17 @@ def main():
         pretrain(net_g, train_dl, opt, loss_func, PRETRAINING_EPOCHS)
             
         model = MainModel(net_g)
-        torch.save(model.state_dict(), main_model_path)
+        torch.save(model.state_dict(), MODEL_PATH)
         print('\nmain_model.pt saved')
         print("\nStarting MainModel training...")
-        train_model(model, train_dl, TRAINING_EPOCHS, main_model_path)
+        train_model(model, train_dl, TRAINING_EPOCHS, MODEL_PATH)
         
     else:
         model = MainModel()
-        model.load_state_dict(torch.load(main_model_path, DEVICE))
+        model.load_state_dict(torch.load(MODEL_PATH, DEVICE))
         print("\nmain_model.pt loaded")
         print("Continuing MainModel training...")
-        train_model(model, train_dl, TRAINING_EPOCHS, main_model_path)      
+        train_model(model, train_dl, TRAINING_EPOCHS, MODEL_PATH)      
     
     
     input("Press Enter to continue...")

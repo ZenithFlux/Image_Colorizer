@@ -7,12 +7,19 @@ Output of the model will be of this resolution.
 """
 IMAGE_SIZE = (256, 256)
 
+# set the path to folder where all the images for training are stored
 DATASET_PATH = "dataset\\COCOval2014"
+
+# Number of images to train on
 TRAINING_SET_SIZE = 8000
 
 # Try reducing these values if your pc is going out of memory
+# Increase these values if your pc is more capable
 BATCH_SIZE = 4
 NUM_WORKERS = 1
+
+# path for both storing and loading model
+MODEL_PATH = "main_model.pt"
 
 PRETRAINING_EPOCHS = 20
 TRAINING_EPOCHS = 20
