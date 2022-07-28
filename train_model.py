@@ -10,7 +10,7 @@ def main():
     train_dl = make_dataloader(paths.train_paths, 'train', IMAGE_SIZE, BATCH_SIZE, NUM_WORKERS)
 
     if not os.path.exists(MODEL_PATH):
-        net_g = unet_resnet18(1, 2)
+        net_g = unet_resnet18(1, 2, IMAGE_SIZE)
         opt = torch.optim.Adam(net_g.parameters(), 1e-4)
         loss_func = torch.nn.L1Loss()
         print("\nStarting unet pretraining...")
@@ -23,7 +23,7 @@ def main():
         train_model(model, train_dl, TRAINING_EPOCHS, MODEL_PATH)
         
     else:
-        model = MainModel()
+        model = MainModel(image_size = IMAGE_SIZE)
         model.load_state_dict(torch.load(MODEL_PATH, DEVICE))
         print("\nmain_model.pt loaded")
         print("Continuing MainModel training...")

@@ -9,10 +9,10 @@ from .utility import AverageCalculator
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # function to create generator
-def unet_resnet18(in_channels: int, out_channels: int, size: tuple[int, int] = (256, 256)) -> DynamicUnet:
+def unet_resnet18(in_channels: int, out_channels: int, image_size: tuple[int, int]) -> DynamicUnet:
     body = create_body(resnet18(True), pretrained=True, n_in=in_channels, cut=-2)
-    model = DynamicUnet(body, out_channels, size).to(DEVICE)
-    return model  
+    model = DynamicUnet(body, out_channels, image_size).to(DEVICE)
+    return model
 
 class GANLoss(nn.Module):
     def __init__(self, real_label: float=1.0, fake_label: float=0.0):
@@ -37,7 +37,8 @@ class PatchDiscriminator(nn.Module):
     def __init__(self, in_channels: int, n_filters: int=64, hidden_layers: int=3):
         super().__init__()
         model = [self.get_layers(in_channels, n_filters, norm=False)]
-        model += [self.get_layers(n_filters * 2**i, n_filters * 2**(i+1), s=1 if i == (hidden_layers-1) else 2) for i in range(hidden_layers)]
+        model += [self.get_layers(n_filters * 2**i, n_filters * 2**(i+1),
+                                  s=1 if i == (hidden_layers-1) else 2) for i in range(hidden_layers)]
         model += [self.get_layers(n_filters * 2**hidden_layers, 1, s=1, norm=False, act=False)]
         self.model = nn.Sequential(*model)
     
@@ -51,10 +52,18 @@ class PatchDiscriminator(nn.Module):
         return self.model(X)
   
 class MainModel(nn.Module):
-    def __init__(self, net_g = unet_resnet18(1, 2), lr_g: float=2e-4, lr_d: float=2e-4, beta1: float=0.5, beta2: float=0.999, lambda_L1: int=100):
+    def __init__(self, net_g = None, image_size: tuple[int, int] = None,
+                 lr_g: float=2e-4, lr_d: float=2e-4, beta1: float=0.5, beta2: float=0.999, lambda_L1: float=100.):
         super().__init__()
         self.lambda_L1 = lambda_L1
-        self.net_g = net_g.to(DEVICE)
+        
+        if net_g is not None:
+            self.net_g = net_g.to(DEVICE)
+        elif image_size is not None:
+            self.net_g = unet_resnet18(1, 2, image_size).to(DEVICE)
+        else:
+            raise ValueError("A value must be passed for either 'net_g' or 'image_size' in MainModel().")
+            
         self.net_d = init_model(PatchDiscriminator(3))
         self.GANcriterion = GANLoss().to(DEVICE)
         self.L1criterion = nn.L1Loss()
@@ -109,16 +118,17 @@ class MainModel(nn.Module):
         self.backward_g()
         self.opt_g.step()
 
-# This function initialises weights of a model
+# This function initializes weights of a model
 def init_model(model, gain: float = 0.02):
     model = model.to(DEVICE)
     
     def init_weights(layer):
+        classname = layer.__class__.__name__
         with torch.no_grad():
-            if hasattr(layer, 'weight') and isinstance(layer, nn.Conv2d):
+            if hasattr(layer, 'weight') and 'Conv' in classname:
                 nn.init.normal_(layer.weight, 0.0, gain)
             
-            elif isinstance(layer, nn.BatchNorm2d):
+            elif 'BatchNorm2d' in classname:
                 nn.init.normal_(layer.weight, 1., gain)
                 nn.init.constant_(layer.bias, 0.)
                 
@@ -148,16 +158,19 @@ def pretrain(model, train_dl, optimizer, loss_func, epochs: int):
 def train_model(model, train_dl, epochs: int, save_path: str):
     for epoch in range(epochs):
         print(f'\nTraining Epoch {epoch+1}/{epochs}:')
-        avg_calc = AverageCalculator()
-        
+        avg_calc_g = AverageCalculator()
+        avg_calc_d = AverageCalculator()
+                
         for data in tqdm(train_dl):
             model.setup_input(data)
             model.optimize()
             
-            avg_calc.update(model.loss_g.item())
+            avg_calc_g.update(model.loss_g.item())
+            avg_calc_d.update(model.loss_d.item())
+            
+        avg_d, avg_g = avg_calc_d.average(), avg_calc_g.average()
         
-        avg_loss = avg_calc.average()
-        print(f'Epoch {epoch+1}: Avg. Loss = {avg_loss}')
+        print(f'Epoch {epoch+1}: Discriminator Loss = {avg_d:.3f}, Generator Loss = {avg_g:.3f}')
         
         torch.save(model.state_dict(), save_path)
         print("Model saved")

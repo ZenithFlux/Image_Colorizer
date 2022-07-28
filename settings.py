@@ -8,7 +8,7 @@ Output of the model will be of this resolution.
 IMAGE_SIZE = (256, 256)
 
 # set the path to folder where all the images for training are stored
-DATASET_PATH = "dataset\\COCOval2014"
+DATASET_PATH = "dataset\\coco"
 
 # Number of images to train on
 TRAINING_SET_SIZE = 8000

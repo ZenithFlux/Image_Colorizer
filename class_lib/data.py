@@ -35,7 +35,7 @@ class Datapaths:
             
 
 class ImagesDataset(Dataset):
-    def __init__(self, paths, dataset_type: str = 'train', image_size: tuple[int, int] = (256, 256)):
+    def __init__(self, paths, dataset_type: str = 'train', image_size: tuple[int, int] = None):
         self.paths = paths
         
         BICUBIC = transforms.InterpolationMode.BICUBIC
@@ -64,7 +64,7 @@ class ImagesDataset(Dataset):
 Function to create dataloaders:
 - pin_memory is set to True by default bcz my pc has CUDA available
 '''
-def make_dataloader(paths, dataset_type: str, image_size: tuple[int, int] = (256, 256),
+def make_dataloader(paths, dataset_type: str, image_size: tuple[int, int],
                     batch_size: int = 16, num_workers: int = 4, pin_memory: bool = True) -> DataLoader:
     dataset = ImagesDataset(paths, dataset_type, image_size)
     dataloader = DataLoader(dataset, batch_size= batch_size, num_workers= num_workers, pin_memory= pin_memory)

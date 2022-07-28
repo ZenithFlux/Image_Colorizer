@@ -1,6 +1,9 @@
 import torch
+import cv2
+from PIL import Image
+import numpy as np
 
-DEVICE = DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class AverageCalculator:
     def __init__(self):
@@ -22,3 +25,13 @@ def print_gpu_status():
         print('Memory Usage:')
         print('Allocated:', round(torch.cuda.memory_allocated()/1024**3,1), 'GB')
         print('Reserved:   ', round(torch.cuda.memory_reserved()/1024**3,1), 'GB')
+        
+def cv2_to_pil(img):
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    pil_img = Image.fromarray(img)
+    return pil_img
+
+def pil_to_cv2(img):
+    img = np.array(img)
+    cv2_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    return cv2_img

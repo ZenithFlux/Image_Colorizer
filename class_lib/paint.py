@@ -2,13 +2,16 @@ from PIL import Image
 from skimage.color import lab2rgb
 from torchvision import transforms
 from torch import cat, device, load
+import cv2
+from tqdm import tqdm
 import numpy as np
-from .nn import MainModel
+from .nn import MainModel, DEVICE
+from .utility import pil_to_cv2, cv2_to_pil
 
 class ImagePainter:
     def __init__(self, model_path: str, image_size: tuple[int, int]):
-        self.model = MainModel()
-        self.model.load_state_dict(load(model_path))
+        self.model = MainModel(image_size=image_size)
+        self.model.load_state_dict(load(model_path, DEVICE))
         self.image_size = image_size
     
     def get_L(self, img):
@@ -36,5 +39,31 @@ class ImagePainter:
         
         return img
         
+def paint_video(video_path: str, save_path: str, painter: ImagePainter):
+    """Output video will be of same resolution as 'image_size' of ImagePainter object."""
+    
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        print('Invalid Video Path')
+        return
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    
+    out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, painter.image_size)
+    print(f"\nColouring Video at {fps}fps and {painter.image_size[0]}x{painter.image_size[1]} resolution:")
+    
+    for _ in tqdm(range(total_frames)):
+        ret, frame = cap.read()
         
-        
+        if ret:
+            img = cv2_to_pil(frame)
+            img = painter.paint(img)
+            frame = pil_to_cv2(img)
+            
+            out.write(frame)
+            
+    cap.release()
+    out.release()
+    cv2.destroyAllWindows()
+    
+    print(f"Coloured video successfully saved\n") 
