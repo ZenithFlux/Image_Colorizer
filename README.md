@@ -1,6 +1,16 @@
 # Movie_Colorizer
 
-This program colors B&W movies using deep learning.
+This program can colour B&W movies using deep learning.
+
+Some example images painted by this program:
+
+<img src="https://i.ibb.co/NLXP0ZQ/gray.jpg" alt="Black & White Image 1" width="20%"/> &nbsp;&nbsp;&nbsp;<img src="https://i.ibb.co/S35NVN0/coloured.jpg" alt="Coloured Image 1" width="20%"/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://i.ibb.co/VmwcQxB/gray2.jpg" alt="Black & White Image 2" width="20%"/> &nbsp;&nbsp;&nbsp;<img src="https://i.ibb.co/SX1Wgvw/coloured2.jpg" alt="Coloured Image 2" width="20%"/>
+
+<br/>
+
+<img src="https://i.ibb.co/LdxHxjd/gray3.jpg" alt="Black & White Image 3" width="20%"/> &nbsp;&nbsp;&nbsp;<img src="https://i.ibb.co/QNCBhjp/coloured3.jpg" alt="Coloured Image 3" width="20%"/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://i.ibb.co/jT87x1K/gray4.jpg" alt="Black & White Image 4" width="20%"/> &nbsp;&nbsp;&nbsp;<img src="https://i.ibb.co/p4Wh5bn/coloured4.jpg" alt="Coloured Image 4" width="20%"/>
+
+## Installing Dependencies
 
 Type this in command line to install all dependencies except PyTorch:
 
@@ -16,7 +26,7 @@ Model trained on this dataset for 256x256 images- [Download from G-Drive](https:
 
 ## How to Use
 
-*Note (For Non-Technical Users) -* Users who have no knowledge of deep learning or pytorch are advised to only edit values in 'settings.py'. Most of the training and application usage can be handled using this file.
+*Note (For Non-Technical Users) -* Users who have no knowledge of deep learning or pytorch are advised to only edit values in ***'settings.py'***. Most of the training and application usage can be handled using this file.
 
 **train_model.py -** You can train your own image colouring model by running this script. All training settings can be adjusted from 'settings.py'.
 

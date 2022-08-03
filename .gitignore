@@ -3,4 +3,3 @@ dataset
 __pycache__
 class_lib/__pycache__
 main_model.pt
-test.py

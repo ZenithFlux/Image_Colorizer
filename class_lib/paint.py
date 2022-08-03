@@ -46,11 +46,11 @@ def paint_video(video_path: str, save_path: str, painter: ImagePainter):
     if not cap.isOpened():
         print('Invalid Video Path')
         return
-    fps = int(cap.get(cv2.CAP_PROP_FPS))
+    fps = cap.get(cv2.CAP_PROP_FPS)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     
     out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, painter.image_size)
-    print(f"\nColouring Video at {fps}fps and {painter.image_size[0]}x{painter.image_size[1]} resolution:")
+    print(f"\nColouring Video at {fps:.2f}fps and {painter.image_size[0]}x{painter.image_size[1]} resolution:")
     
     for _ in tqdm(range(total_frames)):
         ret, frame = cap.read()
