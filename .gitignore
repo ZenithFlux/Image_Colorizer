@@ -1,5 +1,11 @@
-venv
-dataset
+# ignore filenames starting with underscore except when ending with __.py
+_*
+!*__.py
+
+# dev folders
+/venv
+/dataset
+
+# cache
 __pycache__
-class_lib/__pycache__
 main_model.pt

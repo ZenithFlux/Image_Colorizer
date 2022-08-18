@@ -77,7 +77,9 @@ class MainModel(nn.Module):
     def forward(self, L = None):
         if L is not None:
             L = L.to(DEVICE)
+            self.net_g.eval()
             with torch.no_grad(): ab = self.net_g(L)
+            self.net_g.train()
             return ab
             
         self.fake_ab = self.net_g(self.L)
