@@ -5,6 +5,13 @@ from torchvision.models.resnet import resnet18
 from fastai.vision.models.unet import DynamicUnet
 from tqdm import tqdm
 from .utility import AverageCalculator
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from torch import Tensor
+    from torch.nn import Module
+    from torch.optim import Optimizer
+    from torch.utils.data import DataLoader
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -21,7 +28,7 @@ class GANLoss(nn.Module):
         self.register_buffer('fake_label', torch.tensor(fake_label))
         self.loss = nn.BCEWithLogitsLoss()
 
-    def get_labels(self, pred, is_real: bool):
+    def get_labels(self, pred: 'Tensor', is_real: bool) -> 'Tensor':
         if is_real:
             labels = self.real_label
         else:
@@ -29,7 +36,7 @@ class GANLoss(nn.Module):
             
         return labels.expand_as(pred)
     
-    def __call__(self, pred, is_real: bool):
+    def __call__(self, pred: 'Tensor', is_real: bool) -> 'Tensor':
         labels = self.get_labels(pred, is_real)
         return self.loss(pred, labels)
         
@@ -42,17 +49,17 @@ class PatchDiscriminator(nn.Module):
         model += [self.get_layers(n_filters * 2**hidden_layers, 1, s=1, norm=False, act=False)]
         self.model = nn.Sequential(*model)
     
-    def get_layers(self, in_c, out_c, k=4, s=2, p=1, norm=True, act=True):
+    def get_layers(self, in_c: int, out_c: int, k: int=4, s: int=2, p: int=1, norm: bool=True, act: bool=True):
         layers = [nn.Conv2d(in_c, out_c, k, s, p, bias=not norm)]
         if norm: layers += [nn.BatchNorm2d(out_c)]
         if act: layers += [nn.LeakyReLU(0.2, True)]
         return nn.Sequential(*layers)
     
-    def forward(self, X):
+    def forward(self, X: 'Tensor') -> 'Tensor':
         return self.model(X)
   
 class MainModel(nn.Module):
-    def __init__(self, net_g = None, image_size: tuple[int, int] = None,
+    def __init__(self, net_g: DynamicUnet | None = None, image_size: tuple[int, int] | None = None,
                  lr_g: float=2e-4, lr_d: float=2e-4, beta1: float=0.5, beta2: float=0.999, lambda_L1: float=100.):
         super().__init__()
         self.lambda_L1 = lambda_L1
@@ -70,11 +77,11 @@ class MainModel(nn.Module):
         self.opt_g = optim.Adam(self.net_g.parameters(), lr=lr_g, betas=(beta1, beta2))
         self.opt_d = optim.Adam(self.net_d.parameters(), lr=lr_d, betas=(beta1, beta2))
 
-    def setup_input(self, data):
+    def setup_input(self, data: 'dict[str, Tensor]'):
         self.L = data['L'].to(DEVICE)
         self.ab = data['ab'].to(DEVICE)
         
-    def forward(self, L = None):
+    def forward(self, L: 'Tensor | None' = None) -> 'Tensor | None':
         if L is not None:
             L = L.to(DEVICE)
             self.net_g.eval()
@@ -102,7 +109,7 @@ class MainModel(nn.Module):
         self.loss_g = self.gan_loss_g + self.L1_loss_g
         self.loss_g.backward()
         
-    def set_requires_grad(self, model, requires_grad=True):
+    def set_requires_grad(self, model: 'Module', requires_grad: bool=True):
         for p in model.parameters():
             p.requires_grad = requires_grad
         
@@ -121,7 +128,7 @@ class MainModel(nn.Module):
         self.opt_g.step()
 
 # This function initializes weights of a model
-def init_model(model, gain: float = 0.02):
+def init_model(model: 'Module', gain: float = 0.02) -> 'Module':
     model = model.to(DEVICE)
     
     def init_weights(layer):
@@ -137,7 +144,7 @@ def init_model(model, gain: float = 0.02):
     model.apply(init_weights)
     return model
 
-def pretrain(model, train_dl, optimizer, loss_func, epochs: int):
+def pretrain(model: DynamicUnet, train_dl: 'DataLoader', optimizer: 'Optimizer', loss_func, epochs: int):
     for e in range(epochs):
         print(f'\nPretraining Epoch {e+1}/{epochs}:')
         avg_calc = AverageCalculator()
@@ -157,7 +164,7 @@ def pretrain(model, train_dl, optimizer, loss_func, epochs: int):
     
     print("\nGenerator Pretrained!")
     
-def train_model(model, train_dl, epochs: int, save_path: str):
+def train_model(model: MainModel, train_dl: 'DataLoader', epochs: int, save_path: str):
     for epoch in range(epochs):
         print(f'\nTraining Epoch {epoch+1}/{epochs}:')
         avg_calc_g = AverageCalculator()

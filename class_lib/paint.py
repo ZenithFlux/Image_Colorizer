@@ -7,6 +7,11 @@ from tqdm import tqdm
 import numpy as np
 from .nn import MainModel, DEVICE
 from .utility import pil_to_cv2, cv2_to_pil
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from PIL.Image import Image
+    from torch import Tensor
 
 class ImagePainter:
     def __init__(self, model_path: str, image_size: tuple[int, int]):
@@ -14,13 +19,13 @@ class ImagePainter:
         self.model.load_state_dict(load(model_path, DEVICE))
         self.image_size = image_size
     
-    def get_L(self, img):
+    def get_L(self, img: 'Image') -> 'Tensor':
         img = img.convert('L')
         img = transforms.Resize(self.image_size, transforms.InterpolationMode.BICUBIC)(img)
         img = (transforms.ToTensor()(img) * 100) / 50.0 - 1       # Brings L between -1 and 1
         return img
     
-    def lab_to_image(self, L, ab):
+    def lab_to_image(self, L: 'Tensor', ab: 'Tensor') -> 'Image':
         L = (L + 1) * 50.0
         ab = ab * 128
         Lab = cat([L, ab], dim=1).permute(0, 2, 3, 1)[0].cpu().numpy()
@@ -29,7 +34,7 @@ class ImagePainter:
         img = Image.fromarray(img_arr)
         return img
     
-    def paint(self, image: Image.Image) -> Image.Image:
+    def paint(self, image: 'Image') -> 'Image':
         """Takes PIL image as input, returns PIL image as output."""
         L = self.get_L(image)
         L = L.unsqueeze(0)

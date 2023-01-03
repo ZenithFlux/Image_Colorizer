@@ -5,6 +5,11 @@ from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 from skimage.color import rgb2lab
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from torch import Tensor
+    from numpy import ndarray
 
 class Datapaths:
     def __init__(self, path: str, train_size: int, validation_size: int, randomizer_seed: int = None):
@@ -35,7 +40,7 @@ class Datapaths:
             
 
 class ImagesDataset(Dataset):
-    def __init__(self, paths, dataset_type: str = 'train', image_size: tuple[int, int] = None):
+    def __init__(self, paths: 'ndarray | list[str]', dataset_type: str = 'train', image_size: tuple[int, int] = None):
         self.paths = paths
         
         BICUBIC = transforms.InterpolationMode.BICUBIC
@@ -46,7 +51,7 @@ class ImagesDataset(Dataset):
         else:
             self.transformations = transforms.Resize(image_size, BICUBIC)
         
-    def __getitem__(self, i: int) -> dict:
+    def __getitem__(self, i: int) -> 'dict[str, Tensor]':
         img = Image.open(self.paths[i]).convert('RGB')
         img = self.transformations(img)
             
@@ -56,7 +61,7 @@ class ImagesDataset(Dataset):
         ab = img[[1, 2], ...] / 128     # Bring between -1 and 1
         return {'L': L, 'ab': ab}
     
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.paths)
     
 
@@ -64,7 +69,7 @@ class ImagesDataset(Dataset):
 Function to create dataloaders:
 - pin_memory is set to True by default bcz my pc has CUDA available
 '''
-def make_dataloader(paths, dataset_type: str, image_size: tuple[int, int],
+def make_dataloader(paths: 'ndarray | list[str]', dataset_type: str, image_size: tuple[int, int],
                     batch_size: int = 16, num_workers: int = 4, pin_memory: bool = True) -> DataLoader:
     dataset = ImagesDataset(paths, dataset_type, image_size)
     dataloader = DataLoader(dataset, batch_size= batch_size, num_workers= num_workers, pin_memory= pin_memory)
