@@ -24,7 +24,10 @@ MODEL_PATH = "main_model.pt"
 PRETRAINING_EPOCHS = 20
 TRAINING_EPOCHS = 20
 
+# Intensity of L1 Loss
+LAMBDA_L1 = 10.
+
 """
-If you want to train completely new image colouring model, make sure to delete 'main_model.pt' file
+If you want to train completely new image colouring model, make sure that there is no 'main_model.pt' file
 or else training algorithm will continue training the existing model.
 """

@@ -167,19 +167,23 @@ def pretrain(model: DynamicUnet, train_dl: 'DataLoader', optimizer: 'Optimizer',
 def train_model(model: MainModel, train_dl: 'DataLoader', epochs: int, save_path: str):
     for epoch in range(epochs):
         print(f'\nTraining Epoch {epoch+1}/{epochs}:')
-        avg_calc_g = AverageCalculator()
         avg_calc_d = AverageCalculator()
+        avg_calc_gan = AverageCalculator()
+        avg_calc_L1 = AverageCalculator()
                 
         for data in tqdm(train_dl):
             model.setup_input(data)
             model.optimize()
             
-            avg_calc_g.update(model.loss_g.item())
             avg_calc_d.update(model.loss_d.item())
+            avg_calc_gan.update(model.gan_loss_g.item())
+            avg_calc_L1.update(model.L1_loss_g.item())
             
-        avg_d, avg_g = avg_calc_d.average(), avg_calc_g.average()
+        avg_d = avg_calc_d.average()
+        avg_gan, avg_L1 = avg_calc_gan.average(), avg_calc_L1.average()
         
-        print(f'Epoch {epoch+1}: Discriminator Loss = {avg_d:.3f}, Generator Loss = {avg_g:.3f}')
+        print(f'Discriminator Loss = {avg_d:.3f}')
+        print(f'Generator: GAN Loss = {avg_gan:.3f}, L1_Loss = {avg_L1:.3f}')
         
         torch.save(model.state_dict(), save_path)
         print("Model saved")

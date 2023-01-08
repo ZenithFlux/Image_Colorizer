@@ -16,14 +16,14 @@ def main():
         print("\nStarting unet pretraining...")
         pretrain(net_g, train_dl, opt, loss_func, PRETRAINING_EPOCHS)
             
-        model = MainModel(net_g)
+        model = MainModel(net_g, lambda_L1=LAMBDA_L1)
         torch.save(model.state_dict(), MODEL_PATH)
         print('\nmain_model.pt saved')
         print("\nStarting MainModel training...")
         train_model(model, train_dl, TRAINING_EPOCHS, MODEL_PATH)
         
     else:
-        model = MainModel(image_size = IMAGE_SIZE)
+        model = MainModel(image_size = IMAGE_SIZE, lambda_L1=LAMBDA_L1)
         model.load_state_dict(torch.load(MODEL_PATH, DEVICE))
         print("\nmain_model.pt loaded")
         print("Continuing MainModel training...")
