@@ -10,6 +10,6 @@ if __name__ == "__main__":
     print("If input video is coloured than it will be converted to grayscale and then painted.\n")
     
     video_path = input("Enter video path: ")
-    save_path = input("Enter colourized video save path: ")
+    save_path = input("Enter colourized video save path with filename: ")
     
     colour_video(video_path, save_path)

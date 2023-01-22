@@ -64,13 +64,13 @@ class ImagesDataset(Dataset):
     def __len__(self) -> int:
         return len(self.paths)
     
-
-'''
-Function to create dataloaders:
-- pin_memory is set to True by default bcz my pc has CUDA available
-'''
+    
 def make_dataloader(paths: 'ndarray | list[str]', dataset_type: str, image_size: tuple[int, int],
                     batch_size: int = 16, num_workers: int = 4, pin_memory: bool = True) -> DataLoader:
+    '''
+    Function to create dataloaders:
+    - pin_memory is set to True by default because my pc has CUDA available
+    '''
     dataset = ImagesDataset(paths, dataset_type, image_size)
     dataloader = DataLoader(dataset, batch_size= batch_size, num_workers= num_workers, pin_memory= pin_memory)
     return dataloader

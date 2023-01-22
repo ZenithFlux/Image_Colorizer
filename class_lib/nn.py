@@ -3,15 +3,11 @@ import torch
 from fastai.vision.learner import create_body
 from torchvision.models.resnet import resnet18
 from fastai.vision.models.unet import DynamicUnet
-from tqdm import tqdm
-from .utility import AverageCalculator
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from torch import Tensor
     from torch.nn import Module
-    from torch.optim import Optimizer
-    from torch.utils.data import DataLoader
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -143,49 +139,3 @@ def init_model(model: 'Module', gain: float = 0.02) -> 'Module':
                 
     model.apply(init_weights)
     return model
-
-def pretrain(model: DynamicUnet, train_dl: 'DataLoader', optimizer: 'Optimizer', loss_func, epochs: int):
-    for e in range(epochs):
-        print(f'\nPretraining Epoch {e+1}/{epochs}:')
-        avg_calc = AverageCalculator()
-        
-        for data in tqdm(train_dl):
-            L, ab = data['L'].to(DEVICE), data['ab'].to(DEVICE)
-            preds = model(L)
-            loss = loss_func(preds, ab)
-            loss.backward()
-            optimizer.step()
-            optimizer.zero_grad()
-            
-            avg_calc.update(loss.item())
-        
-        avg_loss = avg_calc.average()    
-        print(f'Epoch {e+1}: Avg. Loss = {avg_loss}')
-    
-    print("\nGenerator Pretrained!")
-    
-def train_model(model: MainModel, train_dl: 'DataLoader', epochs: int, save_path: str):
-    for epoch in range(epochs):
-        print(f'\nTraining Epoch {epoch+1}/{epochs}:')
-        avg_calc_d = AverageCalculator()
-        avg_calc_gan = AverageCalculator()
-        avg_calc_L1 = AverageCalculator()
-                
-        for data in tqdm(train_dl):
-            model.setup_input(data)
-            model.optimize()
-            
-            avg_calc_d.update(model.loss_d.item())
-            avg_calc_gan.update(model.gan_loss_g.item())
-            avg_calc_L1.update(model.L1_loss_g.item())
-            
-        avg_d = avg_calc_d.average()
-        avg_gan, avg_L1 = avg_calc_gan.average(), avg_calc_L1.average()
-        
-        print(f'Discriminator Loss = {avg_d:.3f}')
-        print(f'Generator: GAN Loss = {avg_gan:.3f}, L1_Loss = {avg_L1:.3f}')
-        
-        torch.save(model.state_dict(), save_path)
-        print("Model saved")
-    
-    print("\nTraining Complete!")

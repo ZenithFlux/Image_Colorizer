@@ -1,4 +1,4 @@
-from PIL import Image
+from PIL import Image as Img
 from skimage.color import lab2rgb
 from torchvision import transforms
 from torch import cat, device, load
@@ -22,7 +22,7 @@ class ImagePainter:
     def get_L(self, img: 'Image') -> 'Tensor':
         img = img.convert('L')
         img = transforms.Resize(self.image_size, transforms.InterpolationMode.BICUBIC)(img)
-        img = (transforms.ToTensor()(img) * 100) / 50.0 - 1       # Brings L between -1 and 1
+        img = transforms.ToTensor()(img) * 2 - 1       # Brings L between -1 and 1
         return img
     
     def lab_to_image(self, L: 'Tensor', ab: 'Tensor') -> 'Image':
@@ -31,7 +31,7 @@ class ImagePainter:
         Lab = cat([L, ab], dim=1).permute(0, 2, 3, 1)[0].cpu().numpy()
         img_arr = lab2rgb(Lab) * 255
         img_arr = img_arr.astype(np.uint8)
-        img = Image.fromarray(img_arr)
+        img = Img.fromarray(img_arr)
         return img
     
     def paint(self, image: 'Image') -> 'Image':

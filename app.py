@@ -41,7 +41,7 @@ class GUI(ctk.CTk):
         if imagepath:
             image_size = self.painter.image_size
             
-            self.image1 = Image.open(imagepath)
+            self.image1 = Image.open(imagepath).convert('RGB')
             im1 = ctk.CTkImage(self.image1, size=image_size)
             self.image1_box.configure(text="", image=im1)
             self.image2_box.destroy()
@@ -67,7 +67,7 @@ class GUI(ctk.CTk):
             self.image2.save(savepath)
         
     
-if __name__=="__main__":
+if __name__ == "__main__":
     from class_lib.paint import ImagePainter
     from settings import *
     
