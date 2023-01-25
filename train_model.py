@@ -22,8 +22,7 @@ def main():
     if option==1:
         print("\nFull Model Training details:")
         print(f"\tStep 1: Generator Pretraining ({G_PRETRAINING_EPOCHS} epochs)")
-        print(f"\tStep 2: Discriminator Pretraining ({D_PRETRAINING_EPOCHS} epochs)")
-        print(f"\tStep 3: GAN Training ({GAN_TRAINING_EPOCHS} epochs)")
+        print(f"\tStep 2: GAN Training ({GAN_TRAINING_EPOCHS} epochs)")
     
     if option==2 or option==1:
         paths = Datapaths(DATASET_PATH, PRETRAINING_SET_SIZE, 0, 1)
@@ -31,7 +30,7 @@ def main():
         print("\nStarting Generator pretraining...")
         pretrain(model, train_dl, 1e-4, G_PRETRAINING_EPOCHS, MODEL_PATH)
     
-    if option==3 or option==1:
+    if option==3:
         paths = Datapaths(DATASET_PATH, PRETRAINING_SET_SIZE, 0, 1)
         train_dl = make_dataloader(paths.train_paths, 'train', IMAGE_SIZE, BATCH_SIZE, NUM_WORKERS)
         print("\nStarting Discriminator pretraining...")

@@ -1,14 +1,15 @@
 # Movie_Colorizer
 
-This program can colour B&W movies using deep learning.
+This program can colour B&W movies using deep learning.  
+Final SSIM score = 0.873
 
 Some example images painted by this program:
 
-<img src="https://raw.githubusercontent.com/ZenithFlux/assets/main/movie_colorizer/gray1.jpg" alt="Black & White Image 1" width="20%"/> &nbsp;&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/ZenithFlux/assets/main/movie_colorizer/coloured1.jpg" alt="Coloured Image 1" width="20%"/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/ZenithFlux/assets/main/movie_colorizer/gray2.jpg" alt="Black & White Image 2" width="20%"/> &nbsp;&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/ZenithFlux/assets/main/movie_colorizer/coloured2.jpg" alt="Coloured Image 2" width="20%"/>
+<img src="https://i.ibb.co/NLXP0ZQ/gray.jpg" alt="Black & White Image 1" width="20%"/> &nbsp;&nbsp;&nbsp;<img src="https://i.ibb.co/S35NVN0/coloured.jpg" alt="Coloured Image 1" width="20%"/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://i.ibb.co/VmwcQxB/gray2.jpg" alt="Black & White Image 2" width="20%"/> &nbsp;&nbsp;&nbsp;<img src="https://i.ibb.co/SX1Wgvw/coloured2.jpg" alt="Coloured Image 2" width="20%"/>
 
 <br/>
 
-<img src="https://raw.githubusercontent.com/ZenithFlux/assets/main/movie_colorizer/gray3.jpg" alt="Black & White Image 3" width="20%"/> &nbsp;&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/ZenithFlux/assets/main/movie_colorizer/coloured3.jpg" alt="Coloured Image 3" width="20%"/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/ZenithFlux/assets/main/movie_colorizer/gray4.jpg" alt="Black & White Image 4" width="20%"/> &nbsp;&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/ZenithFlux/assets/main/movie_colorizer/coloured4.jpg" alt="Coloured Image 4" width="20%"/>
+<img src="https://i.ibb.co/LdxHxjd/gray3.jpg" alt="Black & White Image 3" width="20%"/> &nbsp;&nbsp;&nbsp;<img src="https://i.ibb.co/QNCBhjp/coloured3.jpg" alt="Coloured Image 3" width="20%"/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://i.ibb.co/jT87x1K/gray4.jpg" alt="Black & White Image 4" width="20%"/> &nbsp;&nbsp;&nbsp;<img src="https://i.ibb.co/p4Wh5bn/coloured4.jpg" alt="Coloured Image 4" width="20%"/>
 
 ## Installing Dependencies
 

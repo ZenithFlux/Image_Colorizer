@@ -2,6 +2,7 @@ from torch import nn, optim
 import torch
 from fastai.vision.learner import create_body
 from torchvision.models.resnet import resnet18
+from torchvision.models import ResNet18_Weights
 from fastai.vision.models.unet import DynamicUnet
 from typing import TYPE_CHECKING
 
@@ -13,7 +14,8 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # function to create generator
 def unet_resnet18(in_channels: int, out_channels: int, image_size: tuple[int, int]) -> DynamicUnet:
-    body = create_body(resnet18(True), pretrained=True, n_in=in_channels, cut=-2)
+    body = create_body(resnet18(weights=ResNet18_Weights.DEFAULT), 
+                       pretrained=True, n_in=in_channels, cut=-2)
     model = DynamicUnet(body, out_channels, image_size).to(DEVICE)
     return model
 

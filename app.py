@@ -35,7 +35,7 @@ class GUI(ctk.CTk):
       
     def select_image(self):
         imagepath = fd.askopenfilename(title="Select an image", 
-                                       filetypes= (("JPEG", "*.jpg"), 
+                                       filetypes= (("JPEG", ["*.jpg", "*.jfif"]), 
                                                    ("PNG", "*.png"), 
                                                    ("All files", "*.*")))
         if imagepath:
